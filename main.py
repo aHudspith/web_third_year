@@ -2,9 +2,9 @@ import pandas as pd
 import numpy as np
 from scipy.sparse.linalg import svds
 
-ratings_list = [i.strip().split("::") for i in open('/ml-1m/ratings.dat', 'r').readlines()]
-users_list = [i.strip().split("::") for i in open('/ml-1m/users.dat', 'r').readlines()]
-movies_list = [i.strip().split("::") for i in open('/ml-1m/movies.dat', 'r').readlines()]
+ratings_list = [i.strip().split("::") for i in open('ratings.dat', 'r').readlines()]
+users_list = [i.strip().split("::") for i in open('users.dat', 'r').readlines()]
+movies_list = [i.strip().split("::") for i in open('movies.dat', 'r').readlines()]
 
 ratings_df = pd.DataFrame(ratings_list, columns = ['UserID', 'MovieID', 'Rating', 'Timestamp'], dtype = int)
 movies_df = pd.DataFrame(movies_list, columns = ['MovieID', 'Title', 'Genres'])
