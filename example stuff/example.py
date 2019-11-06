@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from scipy.sparse.linalg import svds
 
-ratings_list = [i.strip().split("::") for i in open('ratings.dat', 'r').readlines()]
+"""ratings_list = [i.strip().split("::") for i in open('ratings.dat', 'r').readlines()]
 users_list = [i.strip().split("::") for i in open('users.dat', 'r').readlines()]
 movies_list = [i.strip().split("::") for i in open('movies.dat', 'r').readlines()]
 
@@ -29,8 +29,7 @@ sigma = np.diag(sigma)
 
 all_user_predicted_ratings = np.dot(np.dot(U, sigma), Vt) + user_ratings_mean.reshape(-1, 1)
 preds_df = pd.DataFrame(all_user_predicted_ratings, columns = R_df.columns)
-
-
+"""
 
 
 def recommend_movies(predictions_df, userID, movies_df, original_ratings_df, num_recommendations=5):

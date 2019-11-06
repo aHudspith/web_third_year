@@ -3,4 +3,5 @@ Web Coursework
 
 Third Year SSA Module
 
-Book recommendation system based matrix factorization 
+Model-based recommendation system.
+Uses singular-value matrix decomposition. 
