@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import svds
 
 
@@ -74,23 +75,34 @@ def main_program():
 
     if menu_option == "1":
         input_id = str(input("Please enter the userID: "))
-        # TODO add input_id validation
+        # TODO add input_id validation1
         print("Log in successful")
         test_user.print_info()
 
 
-raw_books = pd.read_csv("data/books.csv")
-# print(raw_books.head())
-# print("---------------")
-# print(raw_books.info())
+df_books = pd.read_csv("data/books.csv")
+df_ratings = pd.read_csv("data/ratings.csv")
+book_data = pd.merge(df_ratings, df_books, on='book_id')
+print(book_data.head())
+print("---------------")
 
-raw_ratings = pd.read_csv("data/ratings.csv")
-# print(raw_ratings.head())
-# print("---------------")
-# print(raw_ratings.info())
+# main_program()
+
+df_books_ratings = book_data.pivot_table(index='user_id', columns='book_title', values='rating')
+books_ratings_matrix = df_books_ratings.to_numpy()
+print(books_ratings_matrix)
 
 print("---------------")
-main_program()
 
+harry_potter_five_ratings = df_books_ratings['Harry Potter and the Order of the Phoenix (Harry Potter, #5)']
+print(harry_potter_five_ratings.head())
 
+print("---------------")
+
+books_like_hp_five = df_books_ratings.corrwith(harry_potter_five_ratings)
+
+corr_hp_five = pd.DataFrame(books_like_hp_five, columns=['Correlation'])
+corr_hp_five.dropna(inplace=True)
+
+print(corr_hp_five.sort_values('Correlation', ascending=False).head(10))
 

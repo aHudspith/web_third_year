@@ -2,34 +2,27 @@ import pandas as pd
 import numpy as np
 from scipy.sparse.linalg import svds
 
-"""ratings_list = [i.strip().split("::") for i in open('ratings.dat', 'r').readlines()]
+ratings_list = [i.strip().split("::") for i in open('ratings.dat', 'r').readlines()]
 users_list = [i.strip().split("::") for i in open('users.dat', 'r').readlines()]
 movies_list = [i.strip().split("::") for i in open('movies.dat', 'r').readlines()]
 
-ratings_df = pd.DataFrame(ratings_list, columns = ['UserID', 'MovieID', 'Rating', 'Timestamp'], dtype = int)
-movies_df = pd.DataFrame(movies_list, columns = ['MovieID', 'Title', 'Genres'])
+ratings_df = pd.DataFrame(ratings_list, columns=['UserID', 'MovieID', 'Rating', 'Timestamp'], dtype=int)
+movies_df = pd.DataFrame(movies_list, columns=['MovieID', 'Title', 'Genres'])
 movies_df['MovieID'] = movies_df['MovieID'].apply(pd.to_numeric)
 
-
-R_df = ratings_df.pivot(index = 'UserID', columns ='MovieID', values = 'Rating').fillna(0)
+R_df = ratings_df.pivot(index='UserID', columns='MovieID', values='Rating').fillna(0)
 R_df.head()
 
-
 R = R_df.as_matrix()
-user_ratings_mean = np.mean(R, axis = 1)
+user_ratings_mean = np.mean(R, axis=1)
 R_demeaned = R - user_ratings_mean.reshape(-1, 1)
 
-
-
-U, sigma, Vt = svds(R_demeaned, k = 50)
-
+U, sigma, Vt = svds(R_demeaned, k=50)
 
 sigma = np.diag(sigma)
 
-
 all_user_predicted_ratings = np.dot(np.dot(U, sigma), Vt) + user_ratings_mean.reshape(-1, 1)
-preds_df = pd.DataFrame(all_user_predicted_ratings, columns = R_df.columns)
-"""
+preds_df = pd.DataFrame(all_user_predicted_ratings, columns=R_df.columns)
 
 
 def recommend_movies(predictions_df, userID, movies_df, original_ratings_df, num_recommendations=5):
@@ -62,12 +55,6 @@ def recommend_movies(predictions_df, userID, movies_df, original_ratings_df, num
 
 
 already_rated, predictions = recommend_movies(preds_df, 837, movies_df, ratings_df, 10)
-
-
-
-
-
-
 
 print(already_rated.head(10))
 
