@@ -24,39 +24,34 @@ class UserProfile:
         self.preferred_genres.append(inp_genre)
 
 
-def recommend_book():
-    # TODO add recommendation function
+def recommend_movies(predictions_df, userID, movies_df, original_ratings_df, num_recommendations=5):
+    # Get and sort the user's predictions
+    user_row_number = userID - 1  # UserID starts at 1, not 0
+    sorted_user_predictions = predictions_df.iloc[user_row_number].sort_values(ascending=False)
 
-    # find all books user has already rated
-    # if have rated all, return that no new books
+    # Get the user's data and merge in the movie information.
+    user_data = original_ratings_df[original_ratings_df.user_id == (userID)]
+    user_full = (user_data.merge(movies_df, how='left', left_on='book_id', right_on='book_id').
+                 sort_values(['rating'], ascending=False)
+                 )
 
-    # with unrated books
-    # go through and recommend from them
+    print
+    'User {0} has already rated {1} movies.'.format(userID, user_full.shape[0])
+    print
+    'Recommending the highest {0} predicted ratings movies not already rated.'.format(num_recommendations)
 
-    print("Recommended book is: ")
+    # Recommend the highest predicted rating movies that the user hasn't seen yet.
+    recommendations = (movies_df[~movies_df['book_id'].isin(user_full['book_id'])].
+                           merge(pd.DataFrame(sorted_user_predictions).reset_index(), how='left',
+                                 left_on='book_id',
+                                 right_on='book_id').
+                           rename(columns={user_row_number: 'Predictions'}).
+                           sort_values('Predictions', ascending=False).
+                           iloc[:num_recommendations, :-1]
+                           )
 
+    return user_full, recommendations
 
-def add_user():
-    # TODO add add_user function
-    # get new user details
-    # check if user already exists
-    # add new user to list of lists?
-    # use objects to store users?
-    print("blah")
-
-
-def update_user():
-    # TODO add update_user function
-    # check user exists
-    # update relevant attribute
-    print("blah")
-
-
-def user_profile():
-    # TODO add logging in function
-    # like logging in??
-    # object users are same as table users! or else how does it work
-    print("blah")
 
 
 def main_program():
@@ -75,34 +70,29 @@ def main_program():
 
     if menu_option == "1":
         input_id = str(input("Please enter the userID: "))
-        # TODO add input_id validation1
+
         print("Log in successful")
         test_user.print_info()
 
 
 df_books = pd.read_csv("data/books.csv")
 df_ratings = pd.read_csv("data/ratings.csv")
+df_books['book_id'] = df_books['book_id'].apply(pd.to_numeric)
+
 book_data = pd.merge(df_ratings, df_books, on='book_id')
-print(book_data.head())
-print("---------------")
 
-# main_program()
-
-df_books_ratings = book_data.pivot_table(index='user_id', columns='book_title', values='rating')
+df_books_ratings = book_data.pivot_table(index='user_id', columns='book_title', values='rating').fillna(0)
 books_ratings_matrix = df_books_ratings.to_numpy()
-print(books_ratings_matrix)
 
+books_ratings_mean = np.mean(books_ratings_matrix, axis=1)
+ratings_demeaned = books_ratings_matrix - books_ratings_mean.reshape(-1, 1)
+u, s, vt = svds(ratings_demeaned, k=50)
+s = np.diag(s)
+
+all_predicted_ratings = np.dot(np.dot(u, s), vt) + books_ratings_mean.reshape(-1, 1)
+df_predictions = pd.DataFrame(all_predicted_ratings, columns=df_books_ratings.columns)
+
+print(df_predictions.head())
 print("---------------")
 
-harry_potter_five_ratings = df_books_ratings['Harry Potter and the Order of the Phoenix (Harry Potter, #5)']
-print(harry_potter_five_ratings.head())
-
-print("---------------")
-
-books_like_hp_five = df_books_ratings.corrwith(harry_potter_five_ratings)
-
-corr_hp_five = pd.DataFrame(books_like_hp_five, columns=['Correlation'])
-corr_hp_five.dropna(inplace=True)
-
-print(corr_hp_five.sort_values('Correlation', ascending=False).head(10))
-
+already_rated, predictions = recommend_movies(df_predictions, 1, df_books, df_ratings, 10)
